@@ -367,6 +367,14 @@ func runWeb(*cli.Context) {
 		m.Get("/fork", repo.Fork)
 		m.Post("/fork", bindIgnErr(auth.CreateRepoForm{}), repo.ForkPost)
 	}, reqSignIn)
+	// managing SSH keys at the repository level.
+	// using specification https://developer.github.com/v3/repos/keys/
+	m.Group("/repos/:username/:reponame", func() {
+		m.Get("/keys", user.SettingsSSHKeys)
+		m.Get("/keys/:id", user.SettingsSSHKeys)
+		m.Post("/keys", bindIgnErr(auth.AddSSHKeyForm{}), user.SettingsSSHKeysPost)
+		m.Delete("/keys/:id", user.SettingsSSHKeys)
+	}, reqSignIn)
 
 	m.Group("/:username/:reponame", func() {
 		m.Get("/settings", repo.Settings)
