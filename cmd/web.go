@@ -220,6 +220,15 @@ func runWeb(*cli.Context) {
 					m.Patch("/hooks/:id:int", bind(api.EditHookOption{}), v1.EditRepoHook)
 					m.Get("/raw/*", middleware.RepoRef(), v1.GetRepoRawFile)
 				}, middleware.ApiRepoAssignment(), middleware.ApiReqToken())
+
+				// managing SSH keys at the repository level.
+				// using specification https://developer.github.com/v3/repos/keys/
+				m.Group("/:username/:reponame", func() {
+					m.Get("/keys", v1.ListSSHKeys)
+					m.Get("/keys/:id:int", v1.GetSSHKey)
+					m.Post("/keys", bindIgnErr(api.AddSSHKeyOption{}), v1.PostSSHKey)
+					m.Delete("/keys/:id:int", v1.PostSSHKey)
+				}, middleware.ApiRepoAssignment(), middleware.ApiReqToken())
 			})
 
 			m.Any("/*", func(ctx *middleware.Context) {
@@ -366,14 +375,6 @@ func runWeb(*cli.Context) {
 		m.Post("/migrate", bindIgnErr(auth.MigrateRepoForm{}), repo.MigratePost)
 		m.Get("/fork", repo.Fork)
 		m.Post("/fork", bindIgnErr(auth.CreateRepoForm{}), repo.ForkPost)
-	}, reqSignIn)
-	// managing SSH keys at the repository level.
-	// using specification https://developer.github.com/v3/repos/keys/
-	m.Group("/repos/:username/:reponame", func() {
-		m.Get("/keys", user.SettingsSSHKeys)
-		m.Get("/keys/:id", user.SettingsSSHKeys)
-		m.Post("/keys", bindIgnErr(auth.AddSSHKeyForm{}), user.SettingsSSHKeysPost)
-		m.Delete("/keys/:id", user.SettingsSSHKeys)
 	}, reqSignIn)
 
 	m.Group("/:username/:reponame", func() {
