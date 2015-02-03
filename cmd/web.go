@@ -210,6 +210,8 @@ func runWeb(*cli.Context) {
 
 			// Repositories.
 			m.Combo("/user/repos", middleware.ApiReqToken()).Get(v1.ListMyRepos).Post(bind(api.CreateRepoOption{}), v1.CreateRepo)
+			m.Combo("/user/keys", middleware.ApiReqToken()).Get(v1.ListSSHKeys).Post(bind(api.AddSSHKeyOption{}), v1.PostSSHKey)
+			m.Delete("/user/keys/:id:int", middleware.ApiReqToken(), v1.PostSSHKey)
 			m.Post("/org/:org/repos", middleware.ApiReqToken(), bind(api.CreateRepoOption{}), v1.CreateOrgRepo)
 			m.Group("/repos", func() {
 				m.Get("/search", v1.SearchRepos)
